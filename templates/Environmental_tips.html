@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Dicas Ambientais - GuapiEcotour{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center mb-4">{{ 'Dicas para um Ecoturismo Responsável' if session.get('lang') == 'pt' else 'Tips for Responsible Ecotourism' }}</h2>
+
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">{{ 'Respeite a Natureza' if session.get('lang') == 'pt' else 'Respect Nature' }}</h5>
+                </div>
+                <div class="card-body">
+                    <ul>
+                        <li>{{ 'Não deixe lixo nas trilhas ou cachoeiras' if session.get('lang') == 'pt' else 'Do not leave trash on trails or waterfalls' }}</li>
+                        <li>{{ 'Leve seu lixo de volta e descarte corretamente' if session.get('lang') == 'pt' else 'Take your trash back and dispose properly' }}</li>
+                        <li>{{ 'Não retire plantas ou flores' if session.get('lang') == 'pt' else 'Do not remove plants or flowers' }}</li>
+                        <li>{{ 'Não alimente os animais silvestres' if session.get('lang') == 'pt' else 'Do not feed wild animals' }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">{{ 'Segurança nas Trilhas' if session.get('lang') == 'pt' else 'Trail Safety' }}</h5>
+                </div>
+                <div class="card-body">
+                    <ul>
+                        <li>{{ 'Mantenha-se nas trilhas demarcadas' if session.get('lang') == 'pt' else 'Stay on marked trails' }}</li>
+                        <li>{{ 'Use calçados adequados' if session.get('lang') == 'pt' else 'Use appropriate footwear' }}</li>
+                        <li>{{ 'Leve água e lanches leves' if session.get('lang') == 'pt' else 'Bring water and light snacks' }}</li>
+                        <li>{{ 'Informe-se sobre o clima antes de sair' if session.get('lang') == 'pt' else 'Check the weather before going out' }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0">{{ 'Cuidados com a Água' if session.get('lang') == 'pt' else 'Water Care' }}</h5>
+                </div>
+                <div class="card-body">
+                    <ul>
+                        <li>{{ 'Não use protetor solar ou repelente antes de entrar na água' if session.get('lang') == 'pt' else 'Do not use sunscreen or repellent before entering the water' }}</li>
+                        <li>{{ 'Não leve produtos químicos para as cachoeiras' if session.get('lang') == 'pt' else 'Do not bring chemical products to waterfalls' }}</li>
+                        <li>{{ 'Preserve as nascentes e margens dos rios' if session.get('lang') == 'pt' else 'Preserve springs and riverbanks' }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">{{ 'O que Evitar' if session.get('lang') == 'pt' else 'What to Avoid' }}</h5>
+                </div>
+                <div class="card-body">
+                    <ul>
+                        <li>{{ 'Evite fazer barulho excessivo' if session.get('lang') == 'pt' else 'Avoid excessive noise' }}</li>
+                        <li>{{ 'Não faça fogueiras em áreas não permitidas' if session.get('lang') == 'pt' else 'Do not make bonfires in unauthorized areas' }}</li>
+                        <li>{{ 'Não deixe seu pet solto em áreas de preservação' if session.get('lang') == 'pt' else 'Do not leave your pet loose in preservation areas' }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="alert alert-success text-center mt-4">
+        <strong>{{ 'Pratique o turismo sustentável!' if session.get('lang') == 'pt' else 'Practice sustainable tourism!' }}</strong><br>
+        {{ 'Pequenas ações fazem a diferença para preservar Guapimirim.' if session.get('lang') == 'pt' else 'Small actions make a difference in preserving Guapimirim.' }}
+    </div>
+</div>
+{% endblock %}

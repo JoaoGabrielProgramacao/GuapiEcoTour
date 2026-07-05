@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Meus Favoritos' if favorites_page else 'Pontos Turísticos' }} - GuapiEcotour{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center mb-4">
+        {% if favorites_page %}
+            {{ 'Meus Pontos Favoritos' if session.get('lang') == 'pt' else 'My Favorite Points' }}
+        {% else %}
+            {{ 'Pontos Turísticos de Guapimirim' if session.get('lang') == 'pt' else 'Tourist Points of Guapimirim' }}
+        {% endif %}
+    </h2>
+    <div class="row">
+        {% for point in points %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="point-card h-100">
+                <img src="{{ point.image_url or 'https://placehold.co/600x400/2e7d32/white?text=Ponto+Tur%C3%ADstico' }}" class="card-img-top" style="height: 200px; object-fit: cover;">
+                <div class="point-card-content">
+                    <h5>{{ point.name_pt if session.get('lang') == 'pt' else point.name_en }}</h5>
+                    <p class="text-muted small">{{ point.summary_pt if session.get('lang') == 'pt' else point.summary_en }}</p>
+                    <div class="mb-2">
+                        <span class="badge bg-info">
+                            {{ point.hours_pt if session.get('lang') == 'pt' else point.hours_en }}
+                        </span>
+                        <span class="badge {% if point.trail_diff_pt == 'Fácil' or point.trail_diff_en == 'Easy' %}bg-success{% elif point.trail_diff_pt == 'Moderada' or point.trail_diff_en == 'Moderate' %}bg-warning{% else %}bg-danger{% endif %}">
+                            {{ point.trail_diff_pt if session.get('lang') == 'pt' else point.trail_diff_en }}
+                        </span>
+                    </div>
+                    <a href="{{ url_for('point_detail', point_id=point.id) }}" class="btn btn-success btn-sm w-100">
+                        {{ 'Ver Detalhes' if session.get('lang') == 'pt' else 'View Details' }}
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12">
+            <div class="alert alert-info text-center">
+                {% if favorites_page %}
+                    {{ 'Você ainda não tem pontos favoritos.' if session.get('lang') == 'pt' else 'You have no favorite points yet.' }}
+                {% else %}
+                    {{ 'Nenhum ponto turístico cadastrado.' if session.get('lang') == 'pt' else 'No tourist points registered.' }}
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

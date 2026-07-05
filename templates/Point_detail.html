@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}{{ point.name_pt if session.get('lang') == 'pt' else point.name_en }} - GuapiEcotour{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('home') }}">{{ 'Início' if session.get('lang') == 'pt' else 'Home' }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('points_list') }}">{{ 'Pontos' if session.get('lang') == 'pt' else 'Points' }}</a></li>
+            <li class="breadcrumb-item active">{{ point.name_pt if session.get('lang') == 'pt' else point.name_en }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-8">
+            <h1>{{ point.name_pt if session.get('lang') == 'pt' else point.name_en }}</h1>
+            <div class="card mb-4">
+                {% if point.image_url %}
+                <img src="{{ point.image_url }}" class="card-img-top" alt="{{ point.name_pt }}" style="max-height: 400px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body">
+                    <p class="lead">{{ point.summary_pt if session.get('lang') == 'pt' else point.summary_en }}</p>
+                    <p>{{ point.description_pt if session.get('lang') == 'pt' else point.description_en }}</p>
+                    {% if point.history_pt %}
+                    <h4>{{ 'História' if session.get('lang') == 'pt' else 'History' }}</h4>
+                    <p>{{ point.history_pt if session.get('lang') == 'pt' else point.history_en }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <button id="favoriteBtn" class="btn btn-outline-danger w-100 mb-2" data-point-id="{{ point.id }}">
+                        {{ 'Favoritar' if session.get('lang') == 'pt' else 'Favorite' }}
+                    </button>
+                    <button class="btn btn-info w-100" onclick="sharePoint('{{ point.name_pt if session.get('lang')=='pt' else point.name_en }}', window.location.href)">
+                        {{ 'Compartilhar' if session.get('lang')=='pt' else 'Share' }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5>{{ 'Informações Práticas' if session.get('lang') == 'pt' else 'Practical Info' }}</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>{{ 'Localização' if session.get('lang') == 'pt' else 'Location' }}:</strong><br>
+                       {{ point.location_details_pt if session.get('lang') == 'pt' else point.location_details_en }}
+                    </p>
+                    <p><strong>{{ 'Horário' if session.get('lang') == 'pt' else 'Hours' }}:</strong><br>
+                       {{ point.hours_pt if session.get('lang') == 'pt' else point.hours_en }}
+                    </p>
+                    <p><strong>{{ 'Dificuldade' if session.get('lang') == 'pt' else 'Difficulty' }}:</strong><br>
+                       {{ point.trail_diff_pt if session.get('lang') == 'pt' else point.trail_diff_en }}
+                    </p>
+                    {% if point.trail_time_min %}
+                    <p><strong>{{ 'Tempo de trilha' if session.get('lang') == 'pt' else 'Trail time' }}:</strong><br>
+                       {{ point.trail_time_min }} min
+                    </p>
+                    {% endif %}
+                    <p><strong>{{ 'Melhor época' if session.get('lang') == 'pt' else 'Best season' }}:</strong><br>
+                       {{ point.best_season_pt if session.get('lang') == 'pt' else point.best_season_en }}
+                    </p>
+                    {% if point.contact_phone %}
+                    <p><strong>{{ 'Contato' if session.get('lang') == 'pt' else 'Contact' }}:</strong><br>
+                       {{ point.contact_phone }}<br>
+                       {% if point.contact_email %}{{ point.contact_email }}{% endif %}
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if point.environmental_tips_pt %}
+            <div class="card mt-3">
+                <div class="card-header bg-info text-white">
+                    <h5>{{ 'Dicas Ambientais' if session.get('lang') == 'pt' else 'Environmental Tips' }}</h5>
+                </div>
+                <div class="card-body">
+                    <p>{{ point.environmental_tips_pt if session.get('lang') == 'pt' else point.environmental_tips_en }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="card mt-3">
+                <div class="card-body text-center">
+                    <a href="{{ url_for('map') }}" class="btn btn-outline-success w-100 mb-2">
+                        {{ 'Ver no Mapa' if session.get('lang') == 'pt' else 'View on Map' }}
+                    </a>
+                    <button onclick="window.history.back()" class="btn btn-secondary w-100">
+                        ← {{ 'Voltar' if session.get('lang') == 'pt' else 'Back' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('favoriteBtn').addEventListener('click', function() {
+        const pointId = this.dataset.pointId;
+        fetch(`/favorite/${pointId}`, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                if (data.favorited) {
+                    this.innerHTML = '{{ "Favoritado" if session.get("lang") == "pt" else "Favorited" }}';
+                    this.classList.remove('btn-outline-danger');
+                    this.classList.add('btn-danger');
+                } else {
+                    this.innerHTML = '{{ "Favoritar" if session.get("lang") == "pt" else "Favorite" }}';
+                    this.classList.remove('btn-danger');
+                    this.classList.add('btn-outline-danger');
+                }
+            });
+    });
+</script>
+{% endblock %}

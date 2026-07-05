@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}Mapa - GuapiEcotour{% endblock %}
+
+{% block extra_css %}
+<style>
+    #map { height: 65vh; width: 100%; border-radius: 10px; }
+    .control-panel { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 15px; }
+    @media (max-width: 768px) { #map { height: 50vh; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center mb-4">{{ 'Mapa Interativo com Rotas Reais' if session.get('lang') == 'pt' else 'Interactive Map with Real Routes' }}</h2>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="control-panel">
+                <h5>{{ 'Trace sua rota' if session.get('lang') == 'pt' else 'Plan your route' }}</h5>
+                <div class="mb-3">
+                    <button id="useMyLocationBtn" class="btn btn-sm btn-outline-success w-100 mb-2">
+                        {{ 'Usar minha localização' if session.get('lang') == 'pt' else 'Use my location' }}
+                    </button>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">{{ 'Destino' if session.get('lang') == 'pt' else 'Destination' }}</label>
+                    <select id="destinationSelect" class="form-select">
+                        <option value="">{{ '-- Selecione um ponto turístico --' if session.get('lang') == 'pt' else '-- Select a tourist point --' }}</option>
+                        {% for point in points %}
+                        <option value="{{ point.lat }},{{ point.lng }}" data-name="{{ point.name_pt if session.get('lang') == 'pt' else point.name_en }}">
+                            {{ point.name_pt if session.get('lang') == 'pt' else point.name_en }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button id="showRouteBtn" class="btn btn-success w-100" disabled>
+                    {{ 'Mostrar rota' if session.get('lang') == 'pt' else 'Show route' }}
+                </button>
+                <button id="clearRouteBtn" class="btn btn-secondary w-100 mt-2">
+                    {{ 'Limpar rota' if session.get('lang') == 'pt' else 'Clear route' }}
+                </button>
+            </div>
+            <div class="control-panel">
+                <h5>{{ 'Pontos Turísticos' if session.get('lang') == 'pt' else 'Tourist Points' }}</h5>
+                <div id="points-list" class="list-group" style="max-height: 300px; overflow-y: auto;">
+                    {% for point in points %}
+                    <div class="list-group-item point-card" onclick="focusPoint({{ point.lat }}, {{ point.lng }}, {{ point.id }})">
+                        <h6 class="mb-0">{{ point.name_pt if session.get('lang') == 'pt' else point.name_en }}</h6>
+                        <small class="text-muted">{{ point.summary_pt if session.get('lang') == 'pt' else point.summary_en }}</small>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div id="map"></div>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    let map;
+    let markers = [];
+    let userLocation = null;
+    let destinationCoords = null;
+    let currentRouteLayer = null;
+
+    function initMap() {
+        map = L.map('map').setView([-22.570, -43.100], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        const points = {{ points | tojson }};
+        const lang = '{{ session.get("lang", "pt") }}';
+        points.forEach(point => {
+            const marker = L.marker([point.lat, point.lng]).addTo(map);
+            const name = lang === 'pt' ? point.name_pt : point.name_en;
+            const summary = lang === 'pt' ? point.summary_pt : point.summary_en;
+            marker.bindPopup(`<b>${name}</b><br>${summary}<br><a href="/ponto/${point.id}" target="_blank">Detalhes →</a>`);
+            markers.push({ marker, lat: point.lat, lng: point.lng, id: point.id });
+        });
+    }
+
+    function checkRouteReady() {
+        document.getElementById('showRouteBtn').disabled = !(userLocation && destinationCoords);
+    }
+
+    document.getElementById('useMyLocationBtn').addEventListener('click', () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                position => {
+                    userLocation = [position.coords.latitude, position.coords.longitude];
+                    if (window.userMarker) map.removeLayer(window.userMarker);
+                    window.userMarker = L.marker(userLocation, {
+                        icon: L.divIcon({ html: '📍', iconSize: [30,30], className: 'user-marker' })
+                    }).addTo(map).bindPopup('Você está aqui').openPopup();
+                    map.setView(userLocation, 15);
+                    checkRouteReady();
+                },
+                error => {
+                    console.error(error);
+                    alert('Erro ao obter localização. Verifique as permissões.');
+                }
+            );
+        } else {
+            alert('Geolocalização não suportada.');
+        }
+    });
+
+    document.getElementById('destinationSelect').addEventListener('change', (e) => {
+        if (e.target.value) {
+            const [lat, lng] = e.target.value.split(',').map(Number);
+            destinationCoords = [lat, lng];
+            checkRouteReady();
+        } else {
+            destinationCoords = null;
+            checkRouteReady();
+        }
+    });
+
+    document.getElementById('showRouteBtn').addEventListener('click', () => {
+        if (!userLocation || !destinationCoords) {
+            alert('Defina sua localização e escolha um destino.');
+            return;
+        }
+
+        if (currentRouteLayer) {
+            map.removeLayer(currentRouteLayer);
+            currentRouteLayer = null;
+        }
+
+        const start = [userLocation[1], userLocation[0]];
+        const end = [destinationCoords[1], destinationCoords[0]];
+
+        const payload = {
+            start: start,
+            end: end
+        };
+
+        fetch('/proxy-route', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(errData => {
+                    const msg = errData.error || errData.message || `HTTP ${response.status}`;
+                    throw new Error(msg);
+                }).catch(() => {
+                    throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data && data.features && data.features.length > 0) {
+                const routeGeoJSON = data.features[0].geometry;
+                if (routeGeoJSON.type === 'LineString') {
+                    const latlngs = routeGeoJSON.coordinates.map(coord => [coord[1], coord[0]]);
+                    currentRouteLayer = L.polyline(latlngs, { color: 'blue', weight: 5 }).addTo(map);
+                    map.fitBounds(currentRouteLayer.getBounds());
+
+                    const segment = data.features[0].properties.segments[0];
+                    if (segment) {
+                        const distancia = (segment.distance / 1000).toFixed(1);
+                        const duracao = (segment.duration / 60).toFixed(0);
+                        const lang = '{{ session.get("lang", "pt") }}';
+                        const msg = lang === 'pt'
+                            ? `Distância: ${distancia} km | Tempo: ${duracao} min`
+                            : `Distance: ${distancia} km | Time: ${duracao} min`;
+                        const infoDiv = document.createElement('div');
+                        infoDiv.className = 'alert alert-success mt-2';
+                        infoDiv.innerHTML = msg;
+                        document.querySelector('.control-panel').prepend(infoDiv);
+                        setTimeout(() => infoDiv.remove(), 8000);
+                    }
+                } else {
+                    alert('Formato de rota inesperado.');
+                }
+            } else {
+                alert('Não foi possível obter a rota.');
+            }
+        })
+        .catch(error => {
+            console.error('Erro detalhado:', error);
+            alert(`Erro ao buscar rota: ${error.message}`);
+        });
+    });
+
+    document.getElementById('clearRouteBtn').addEventListener('click', () => {
+        if (currentRouteLayer) {
+            map.removeLayer(currentRouteLayer);
+            currentRouteLayer = null;
+        }
+    });
+
+    window.focusPoint = (lat, lng, id) => {
+        map.setView([lat, lng], 16);
+        const found = markers.find(m => m.id === id);
+        if (found) found.marker.openPopup();
+        const select = document.getElementById('destinationSelect');
+        for (let i = 0; i < select.options.length; i++) {
+            if (select.options[i].value === `${lat},${lng}`) {
+                select.selectedIndex = i;
+                destinationCoords = [lat, lng];
+                checkRouteReady();
+                break;
+            }
+        }
+    };
+
+    window.onload = initMap;
+</script>
+{% endblock %}

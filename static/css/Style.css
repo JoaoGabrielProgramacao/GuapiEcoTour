@@ -1,0 +1,163 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', 'Poppins', 'Roboto', sans-serif;
+    background-color: #f0f7f0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.navbar {
+    background: linear-gradient(135deg, #1B5E20, #2E7D32) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    padding: 0.8rem 0;
+}
+
+.navbar-brand {
+    font-size: 1.6rem;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.navbar-brand:hover {
+    transform: scale(1.02);
+    transition: transform 0.2s;
+}
+
+.nav-link {
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.nav-link:hover {
+    transform: translateY(-2px);
+    background-color: rgba(255,255,255,0.1);
+    border-radius: 8px;
+}
+
+.hero-section {
+    background: linear-gradient(135deg, rgba(27,94,32,0.8), rgba(46,125,50,0.9)), url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    border-radius: 0 0 30px 30px;
+    margin-bottom: 2rem;
+}
+
+.point-card {
+    border: none;
+    border-radius: 20px;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    background: white;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    height: 100%;
+}
+
+.point-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.2);
+}
+
+.point-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.point-card:hover img {
+    transform: scale(1.05);
+}
+
+.point-card-content {
+    padding: 1.5rem;
+    background: white;
+}
+
+.point-card h5 {
+    color: #1B5E20;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.btn-success {
+    background: linear-gradient(45deg, #2E7D32, #4CAF50);
+    border: none;
+    border-radius: 50px;
+    padding: 10px 24px;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+
+.btn-success:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(46,125,50,0.4);
+    background: linear-gradient(45deg, #1B5E20, #2E7D32);
+}
+
+.btn-outline-success {
+    border-radius: 50px;
+    padding: 8px 20px;
+}
+
+.badge {
+    padding: 5px 12px;
+    border-radius: 30px;
+    font-weight: 500;
+}
+
+.badge-difficulty-facil { background-color: #4caf50; color: white; }
+.badge-difficulty-moderada { background-color: #ff9800; color: white; }
+.badge-difficulty-dificil { background-color: #f44336; color: white; }
+
+footer {
+    background: linear-gradient(135deg, #0A2F0A, #1B5E20);
+    margin-top: auto;
+    padding: 2rem 0;
+    color: #F1F8E9;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@media (max-width: 768px) {
+    .point-card img {
+        height: 150px;
+    }
+    .hero-section h1 {
+        font-size: 2rem;
+    }
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #e0e0e0;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+    background: #2E7D32;
+    border-radius: 10px;
+}

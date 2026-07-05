@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Início - GuapiEcotour{% endblock %}
+
+{% block content %}
+<div class="hero-section" style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80') center/cover; height: 400px; display: flex; align-items: center; justify-content: center; color: white; text-align: center;">
+    <div>
+        <h1 class="display-4">{{ 'Bem-vindo a Guapimirim' if session.get('lang') == 'pt' else 'Welcome to Guapimirim' }}</h1>
+        <p class="lead">{{ 'Sua porta de entrada para a natureza' if session.get('lang') == 'pt' else 'Your gateway to nature' }}</p>
+        <a href="{{ url_for('map') }}" class="btn btn-success btn-lg">{{ 'Explorar Mapa' if session.get('lang') == 'pt' else 'Explore Map' }}</a>
+    </div>
+</div>
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">{{ 'Pontos em Destaque' if session.get('lang') == 'pt' else 'Featured Points' }}</h2>
+    <div class="row">
+        {% for point in points %}
+        <div class="col-md-4 mb-4">
+            <div class="point-card">
+                <img src="{{ point.image_url or 'https://placehold.co/600x400/2e7d32/white?text=Ponto+Tur%C3%ADstico' }}" alt="{{ point.name_pt if session.get('lang') == 'pt' else point.name_en }}" class="card-img-top">
+                <div class="point-card-content">
+                    <h5>{{ point.name_pt if session.get('lang') == 'pt' else point.name_en }}</h5>
+                    <p class="text-muted">{{ point.summary_pt if session.get('lang') == 'pt' else point.summary_en }}</p>
+                    <p><strong>{{ 'Dificuldade:' if session.get('lang') == 'pt' else 'Difficulty:' }}</strong>
+                       {{ point.trail_diff_pt if session.get('lang') == 'pt' else point.trail_diff_en }}
+                    </p>
+                    <a href="{{ url_for('point_detail', point_id=point.id) }}" class="btn btn-outline-success btn-sm">{{ 'Ver Detalhes' if session.get('lang') == 'pt' else 'View Details' }}</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="text-center mt-3">
+        <a href="{{ url_for('points_list') }}" class="btn btn-success">{{ 'Ver Todos os Pontos' if session.get('lang') == 'pt' else 'View All Points' }}</a>
+    </div>
+</div>
+{% endblock %}
