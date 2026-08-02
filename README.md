@@ -1,2 +1,3 @@
 # GuapiEcoTour
-GuapiEcoTour, Um guia de turísmo ecológico para Guapimirim
+GuapiEcoTour, Uma aplicação web de ecoturismo para Guapimirim.
+GuapiEcoTour, A ecoturism web application for Guapimirim.
