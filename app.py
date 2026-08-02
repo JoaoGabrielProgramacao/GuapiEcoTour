@@ -8,10 +8,16 @@ import requests
 
 load_dotenv()
 
-app = Flask(__name__)
+template_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
+app = Flask(__name__, template_folder=template_dir)
 app.secret_key = os.urandom(24)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///guapimirim.db'
+if 'RENDER' in os.environ:
+    db_path = os.path.join('/tmp', 'guapimirim.db')
+else:
+    db_path = 'guapimirim.db'
+
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
