@@ -8,9 +8,18 @@ import requests
 
 load_dotenv()
 
-template_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
-app = Flask(__name__, template_folder=template_dir)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+app = Flask(__name__, template_folder=os.path.join(BASE_DIR, 'templates'))
 app.secret_key = os.urandom(24)
+
+templates_path = os.path.join(BASE_DIR, 'templates')
+print(f"BASE_DIR: {BASE_DIR}")
+print(f"Template folder: {app.template_folder}")
+if os.path.exists(templates_path):
+    print(f"Arquivos em templates: {os.listdir(templates_path)}")
+else:
+    print("ERRO: Pasta templates NÃO ENCONTRADA!")
 
 if 'RENDER' in os.environ:
     db_path = os.path.join('/tmp', 'guapimirim.db')
