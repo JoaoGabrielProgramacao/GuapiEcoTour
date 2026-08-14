@@ -6,21 +6,22 @@ from dotenv import load_dotenv
 import os
 import requests
 
+# Carrega variáveis de ambiente
 load_dotenv()
 
+# =============================================
+# CONFIGURAÇÃO DO FLASK COM CAMINHO ABSOLUTO
+# =============================================
+# Obtém o diretório absoluto onde o app.py está localizado
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
+# Cria a aplicação Flask com o caminho absoluto para a pasta templates
 app = Flask(__name__, template_folder=os.path.join(BASE_DIR, 'templates'))
 app.secret_key = os.urandom(24)
 
-templates_path = os.path.join(BASE_DIR, 'templates')
-print(f"BASE_DIR: {BASE_DIR}")
-print(f"Template folder: {app.template_folder}")
-if os.path.exists(templates_path):
-    print(f"Arquivos em templates: {os.listdir(templates_path)}")
-else:
-    print("ERRO: Pasta templates NÃO ENCONTRADA!")
-
+# =============================================
+# CONFIGURAÇÃO DO BANCO DE DADOS (com suporte ao Render)
+# =============================================
 if 'RENDER' in os.environ:
     db_path = os.path.join('/tmp', 'guapimirim.db')
 else:
@@ -31,6 +32,20 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
 
+# =============================================
+# DEBUG: Verifica se a pasta templates existe
+# =============================================
+templates_path = os.path.join(BASE_DIR, 'templates')
+print(f"BASE_DIR: {BASE_DIR}")
+print(f"Template folder: {app.template_folder}")
+if os.path.exists(templates_path):
+    print(f"Arquivos em templates: {os.listdir(templates_path)}")
+else:
+    print("ERRO: Pasta templates NÃO ENCONTRADA!")
+
+# =============================================
+# FLASK-LOGIN
+# =============================================
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
@@ -42,9 +57,11 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 
+# =============================================
+# ROTA PROXY (OpenRouteService)
+# =============================================
 @app.route("/proxy-route", methods=['POST'])
 def proxy_route():
-    # A chave agora vem do .env, não do frontend
     api_key = os.getenv('ORS_API_KEY')
 
     data = request.get_json()
@@ -60,7 +77,7 @@ def proxy_route():
     payload = {
         "coordinates": [start, end],
         "format": "geojson",
-        "radiuses": [5000, 5000],
+        "radiuses": [500, 500],
         "geometry": True
     }
 
@@ -81,6 +98,9 @@ def proxy_route():
         return jsonify({'error': 'Erro ao conectar ao ORS'}), 500
 
 
+# =============================================
+# ROTA DE CLIMA
+# =============================================
 @app.route("/clima")
 def clima():
     lang = request.args.get('lang', 'pt')
@@ -94,6 +114,9 @@ def clima():
         return jsonify({'clima': msg})
 
 
+# =============================================
+# ROTAS DE AUTENTICAÇÃO
+# =============================================
 @app.route("/login", methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -116,6 +139,9 @@ def logout():
     return redirect(url_for('login'))
 
 
+# =============================================
+# ROTAS PRINCIPAIS
+# =============================================
 @app.route("/")
 @login_required
 def home():
@@ -188,6 +214,9 @@ def api_points():
     } for p in points])
 
 
+# =============================================
+# ROTAS DE FAVORITOS
+# =============================================
 @app.route("/favorite/<int:point_id>", methods=['POST'])
 @login_required
 def toggle_favorite(point_id):
@@ -210,7 +239,12 @@ def my_favorites():
     return render_template('points.html', points=points, favorites_page=True)
 
 
+# =============================================
+# CRIA AS TABELAS DO BANCO DE DADOS (SE NÃO EXISTIREM)
+# =============================================
+with app.app_context():
+    db.create_all()
+    print("✅ Tabelas do banco de dados verificadas/criadas com sucesso!")
+
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
     app.run(debug=True)
