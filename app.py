@@ -240,11 +240,20 @@ def my_favorites():
 
 
 # =============================================
-# CRIA AS TABELAS DO BANCO DE DADOS (SE NÃO EXISTIREM)
+# CRIA AS TABELAS DO BANCO DE DADOS E USUÁRIO ADMIN
 # =============================================
 with app.app_context():
     db.create_all()
     print("✅ Tabelas do banco de dados verificadas/criadas com sucesso!")
+
+    # Cria usuário admin se não existir
+    if not User.query.filter_by(username='admin').first():
+        admin = User(username='admin', password=generate_password_hash('123456'))
+        db.session.add(admin)
+        db.session.commit()
+        print("✅ Usuário admin criado com sucesso!")
+    else:
+        print("✅ Usuário admin já existe.")
 
 if __name__ == "__main__":
     app.run(debug=True)
